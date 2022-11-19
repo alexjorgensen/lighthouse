@@ -3,21 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 )
 
 func main() {
 
-	// connect to database
-	/*	db := Database{}
-		err := db.ConnectToDatabase()
-		if err != nil {
-			fmt.Println("error connecting to db:", err.Error())
-			os.Exit(1)
-		}*/
-
-	// Read configuration
+	// Read configuration file
 	settings := Settings{}
 	err := settings.ReadConfigurationFile()
 	if err != nil {
@@ -25,27 +16,36 @@ func main() {
 		os.Exit(1)
 	}
 
-	n := NorlysAPI{}
-	prices, err := n.GetPrices(1, &settings)
+	// connect to database
+	db := Database{}
+	err = db.ConnectToDatabase(&settings)
 	if err != nil {
-		fmt.Println("Error getting prices from norlys:", err.Error())
+		fmt.Println("error connecting to db:", err.Error())
 		os.Exit(1)
 	}
 
-	count := 0
-	total := 0.0
-	for _, pd := range prices {
-		for _, p := range pd.DisplayPrices {
-			// try and convert the timestamp string to int
-			t, err := strconv.Atoi(p.Time)
-			if err == nil {
+	n := NorlysAPI{}
 
-				d := pd.PriceDate.Add(time.Duration(t) * time.Hour)
-				total += p.Value
-				fmt.Println(d, p.Value)
-				count++
+	for {
+		// get the current norlys prices, and update the database
+		fmt.Println("Gettings prices from Norlys...")
+		prices, err := n.GetPrices(1, &settings)
+		if err != nil {
+			// we got an error while trying to get the prices from Norlys, we'll wait 60 seconds and try again.
+			fmt.Println("Error getting prices from norlys:", err.Error())
+			time.Sleep(60 * time.Second)
+			continue
+		}
+
+		fmt.Println("Saving prices to database")
+		for _, pd := range prices {
+			err = db.SaveNorlysPricingResult(&pd)
+			if err != nil {
+				fmt.Println("Error saving the prices to db:", err.Error())
 			}
 		}
+
+		// wait until the configured time has passed befor updating the DB again
+		time.Sleep(time.Duration(settings.NorlysAPI.UpdatePricesInterval) * time.Second)
 	}
-	fmt.Println("total:", total, ", count:", count, " EQ:", total/float64(count))
 }

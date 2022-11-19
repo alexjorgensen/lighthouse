@@ -2,10 +2,11 @@ package main
 
 import (
 	"errors"
-	"github.com/BurntSushi/toml"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/BurntSushi/toml"
 )
 
 // settingsFile contains the configuration filename
@@ -19,7 +20,8 @@ type Settings struct {
 		Password string `toml:"Password"`
 	} `toml:"Database"`
 	NorlysAPI struct {
-		URL string `toml:"URL"`
+		URL                  string `toml:"URL"`
+		UpdatePricesInterval int    `toml:"UpdatePricesInterval"`
 	} `toml:"NorlysAPI"`
 }
 
@@ -65,6 +67,10 @@ func (s *Settings) ReadConfigurationFile() error {
 	}
 	if s.NorlysAPI.URL == "" {
 		return errors.New("norlys url not configured")
+	}
+
+	if s.NorlysAPI.UpdatePricesInterval == 0 {
+		s.NorlysAPI.UpdatePricesInterval = 3600
 	}
 
 	return nil

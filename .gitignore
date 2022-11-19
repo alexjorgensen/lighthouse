@@ -5,6 +5,8 @@
 *.so
 *.dylib
 
+bin/lighthouse
+
 # Test binary, built with `go test -c`
 *.test
 
