@@ -23,6 +23,10 @@ type Settings struct {
 		URL                  string `toml:"URL"`
 		UpdatePricesInterval int    `toml:"UpdatePricesInterval"`
 	} `toml:"NorlysAPI"`
+	ElOverblik struct {
+		FetchDataFromElOverblik bool   `toml:"FetchDataFromElOverblik"`
+		LighthouseToken         string `toml:"LighthouseToken"`
+	} `toml:"ElOverblik"`
 }
 
 // ReadConfigurationFile find the configuration file on disk an parses it
@@ -34,7 +38,7 @@ func (s *Settings) ReadConfigurationFile() error {
 		return err
 	}
 	if !fileExists(filepath.Join(dir, filename)) {
-		return errors.New("error reading configuration file, file: " + filename + " does not exists.")
+		return errors.New("error reading configuration file, file: " + filename + " does not exists")
 	}
 
 	// Read the configuration file into mem
