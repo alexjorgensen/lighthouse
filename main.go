@@ -25,6 +25,13 @@ func main() {
 	}
 
 	n := NorlysAPI{}
+	eo := ElOverblik{}
+
+	// set the application token
+	if eo.SetApplicationToken(settings.ElOverblik.LighthouseToken) != nil {
+		fmt.Println("ERROR:", err.Error())
+		os.Exit(1)
+	}
 
 	for {
 		// get the current norlys prices, and update the database
@@ -43,6 +50,14 @@ func main() {
 			if err != nil {
 				fmt.Println("Error saving the prices to db:", err.Error())
 			}
+		}
+
+		fmt.Println("Getting usage information from Eloverblik")
+		err = eo.GetRequestToken(false)
+		if err != nil {
+			fmt.Println("Error getting request token from eloverblik:", err.Error())
+			time.Sleep(60 * time.Second)
+			continue
 		}
 
 		// wait until the configured time has passed befor updating the DB again
