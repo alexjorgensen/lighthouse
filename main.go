@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	// Read configuration file
 	settings := Settings{}
 	err := settings.ReadConfigurationFile()
@@ -27,9 +26,6 @@ func main() {
 	n := NorlysAPI{}
 	eo := ElOverblik{}
 
-	numberOfDaysForPrices := 2
-	numberOfDaysForMeteringData := 10
-
 	// set the application token
 	if eo.SetApplicationToken(settings.ElOverblik.LighthouseToken) != nil {
 		fmt.Println("ERROR:", err.Error())
@@ -39,7 +35,7 @@ func main() {
 	for {
 		// get the current norlys prices, and update the database
 		fmt.Println("Gettings prices from Norlys...")
-		prices, err := n.GetPrices(numberOfDaysForPrices, &settings)
+		prices, err := n.GetPrices(settings.NumberOfDaysForPrices, &settings)
 		if err != nil {
 			// we got an error while trying to get the prices from Norlys, we'll wait 60 seconds and try again.
 			fmt.Println("Error getting prices from norlys:", err.Error())
@@ -84,7 +80,7 @@ func main() {
 
 		for _, mp := range mps {
 			// let's get the latest time-series data associated to this meteringpoint
-			fromDate := time.Now().Add(-time.Hour * time.Duration(numberOfDaysForMeteringData*24))
+			fromDate := time.Now().Add(-time.Hour * time.Duration(settings.NumberOfDaysForMeteringData*24))
 			toDate := time.Now().Add(-time.Hour * 1)
 			meterReadings, err := eo.GetMeterReadings(mp.MeteringPointId, fromDate, toDate)
 			if err != nil {
