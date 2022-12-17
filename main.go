@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 )
@@ -19,7 +20,7 @@ func main() {
 	db := Database{}
 	err = db.ConnectToDatabase(&settings)
 	if err != nil {
-		fmt.Println("error connecting to db:", err.Error())
+		log.Println("error connecting to db:", err.Error())
 		os.Exit(1)
 	}
 

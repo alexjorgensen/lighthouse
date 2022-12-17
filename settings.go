@@ -28,6 +28,7 @@ type Settings struct {
 	} `toml:"NorlysAPI"`
 	ElOverblik struct {
 		FetchDataFromElOverblik bool   `toml:"FetchDataFromElOverblik"`
+		FetchDataInterval       int    `toml:"FetchDataInterval"`
 		LighthouseToken         string `toml:"LighthouseToken"`
 	} `toml:"ElOverblik"`
 }

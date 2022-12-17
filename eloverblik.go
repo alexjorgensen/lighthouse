@@ -5,8 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -156,7 +156,7 @@ func (eo *ElOverblik) GetRequestToken(forceGetToken bool, saveToken bool) error 
 		return errors.New("no Application token configured")
 	}
 	if eo.ApplicationToken.Expire.Before(time.Now()) {
-		return errors.New("application token has expired, please update it on eloverblik.dk website")
+		return errors.New("Application token has expired, please update it on eloverblik.dk website")
 	}
 
 	// if no request token is available, and saveToken is configured
@@ -165,10 +165,10 @@ func (eo *ElOverblik) GetRequestToken(forceGetToken bool, saveToken bool) error 
 		jsonToken, tokenExits, err := eo.ReadRequestTokenFromDisk()
 		if err == nil {
 			if tokenExits {
-				fmt.Println("Read token from disk")
+				log.Println("Read request token from disk")
 				err = json.Unmarshal(jsonToken, &eo.RequestToken)
 				if err != nil {
-					fmt.Println("unable to use the token from disk:", err.Error())
+					log.Println("Unable to use the request token from disk:", err.Error())
 				}
 			}
 		}
@@ -176,7 +176,7 @@ func (eo *ElOverblik) GetRequestToken(forceGetToken bool, saveToken bool) error 
 
 	// check if the current request token has expired
 	if eo.RequestToken.Token != "" && eo.RequestToken.Expire.After(time.Now()) && !forceGetToken {
-		fmt.Println("the current token is still valid")
+		log.Println("The current request token is still valid")
 		return nil
 	}
 
@@ -244,11 +244,11 @@ func (eo *ElOverblik) GetRequestToken(forceGetToken bool, saveToken bool) error 
 	if saveToken {
 		tokenJson, err := json.Marshal(&eo.RequestToken)
 		if err != nil {
-			fmt.Println("WARNING: unable to convert token to json, for storage:", err.Error())
+			log.Println("WARNING: unable to convert token to json, for storage:", err.Error())
 		} else {
 			err = eo.SaveRequestTokenToDisk(string(tokenJson))
 			if err != nil {
-				fmt.Println("WARNING: unable to save request token to disk:", err.Error())
+				log.Println("WARNING: unable to save request token to disk:", err.Error())
 			}
 		}
 	}
@@ -347,7 +347,7 @@ func (eo *ElOverblik) GetMeterReadings(meteringPoint string, fromDate time.Time,
 	// Get a string representation og the fromDate and toDate
 	seriesFrom := fromDate.Format("2006-01-02")
 	seriesTo := toDate.Format("2006-01-02")
-	fmt.Println("fromDate:", seriesFrom, "toDate:", seriesTo)
+	log.Println("Getting data fromDate:", seriesFrom, "toDate:", seriesTo)
 
 	// create the context, timeout after 20 seconds
 	timeoutContext, cancelFunc := context.WithTimeout(context.Background(), 20*time.Second)
@@ -360,8 +360,6 @@ func (eo *ElOverblik) GetMeterReadings(meteringPoint string, fromDate time.Time,
 	if err != nil {
 		return result, err
 	}
-
-	fmt.Println(string(bjson))
 
 	// create the request
 	req, err := http.NewRequestWithContext(timeoutContext, http.MethodPost, "https://api.eloverblik.dk/customerapi/api/meterdata/gettimeseries/"+seriesFrom+"/"+seriesTo+"/Hour", bytes.NewBuffer(bjson))

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -42,7 +41,7 @@ func (db *Database) SaveNorlysPricingResult(pd *NorlysPricingResult) error {
 				return err
 			}
 			if rows.Close() != nil {
-				fmt.Println("unable to close database rows.")
+				log.Println("unable to close database rows.")
 			}
 		}
 	}
@@ -96,8 +95,8 @@ func (db *Database) SaveMeteringPoints(mps *[]EloverblikMeteringPoint) error {
 	return nil
 }
 
-// SameMeteringTimeSeries save each entry in the timeSeries slice to database
-func (db *Database) SameMeteringTimeSeries(mts EloverblikMeteringTimeSeriesResult) error {
+// SaveMeteringTimeSeries save each entry in the timeSeries slice to database
+func (db *Database) SaveMeteringTimeSeries(mts EloverblikMeteringTimeSeriesResult) error {
 	for _, result := range mts.Result {
 		for _, ts := range result.MyEnergyDataMarketDocument.TimeSeries {
 			for _, p := range ts.Period {

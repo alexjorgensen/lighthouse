@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"time"
 )
@@ -11,20 +11,20 @@ func GetAndSaveNorlysPrices(settings *Settings, db *Database) {
 	n := NorlysAPI{}
 	for {
 		// get the current norlys prices, and update the database
-		fmt.Println("Getting prices from Norlys...")
+		log.Println("Getting prices from Norlys...")
 		prices, err := n.GetPrices(settings.NumberOfDaysForPrices, settings)
 		if err != nil {
 			// we got an error while trying to get the prices from Norlys, we'll wait 60 seconds and try again.
-			fmt.Println("Error getting prices from norlys:", err.Error())
+			log.Println("Error getting prices from norlys:", err.Error())
 			time.Sleep(60 * time.Second)
 			continue
 		}
 
-		fmt.Println("Saving prices to database")
+		log.Println("Saving prices to database")
 		for _, pd := range prices {
 			err = db.SaveNorlysPricingResult(&pd)
 			if err != nil {
-				fmt.Println("Error saving the prices to db:", err.Error())
+				log.Println("Error saving the prices to db:", err.Error())
 			}
 		}
 
@@ -40,34 +40,35 @@ func GetAndSaveEloverblikData(settings *Settings, db *Database) {
 	// set the application token
 	err := eo.SetApplicationToken(settings.ElOverblik.LighthouseToken)
 	if err != nil {
-		fmt.Println("ERROR:", err.Error())
+		log.Println("ERROR:", err.Error())
 		os.Exit(1)
 	}
 
 	for {
 		// let's make a token request to get a request token
-		fmt.Println("Getting request token from Eloverblik")
+		log.Println("Getting request token from Eloverblik")
 		err := eo.GetRequestToken(false, settings.SaveRequestTokenToDisk)
 		if err != nil {
-			fmt.Println("Error getting request token from eloverblik:", err.Error())
+			log.Println("Error getting request token from eloverblik:", err.Error())
 			time.Sleep(60 * time.Second)
 			continue
 		}
 
 		// let's get the meteringspoints associated to the account
-		fmt.Println("Getting meteringpoints from Eloverblik")
+		log.Println("Getting meteringpoints from Eloverblik")
 		mps, err := eo.GetMeteringPoints()
 		if err != nil {
-			fmt.Println("Error getting meteringpoints from eloverblik:", err.Error())
+			log.Println("Error getting meteringpoints from eloverblik:", err.Error())
 			time.Sleep(60 * time.Second)
 			continue
 		}
 
 		// let's save the meteringpoints to database
 		eo.MeteringPoints = mps
+		log.Println("Saving Eloverblik data to database")
 		err = db.SaveMeteringPoints(&mps)
 		if err != nil {
-			fmt.Println("Error saving meteringpoints to database:", err.Error())
+			log.Println("Error saving meteringpoints to database:", err.Error())
 			time.Sleep(60 * time.Second)
 			continue
 		}
@@ -78,23 +79,23 @@ func GetAndSaveEloverblikData(settings *Settings, db *Database) {
 			toDate := time.Now().Add(-time.Hour * 1)
 			meterReadings, err := eo.GetMeterReadings(mp.MeteringPointId, fromDate, toDate)
 			if err != nil {
-				fmt.Println("Error getting meter time-series data:", err.Error())
+				log.Println("Error getting meter time-series data:", err.Error())
 				time.Sleep(60 * time.Second)
 				continue
 			}
 
 			if len(meterReadings.Result) > 0 {
 				// let's save the data to database
-				err = db.SameMeteringTimeSeries(meterReadings)
+				err = db.SaveMeteringTimeSeries(meterReadings)
 				if err != nil {
-					fmt.Println("Error saving meter time-series data to db:", err.Error())
+					log.Println("Error saving meter time-series data to db:", err.Error())
 					time.Sleep(60 * time.Second)
 					continue
 				}
 			}
 		}
 
-		fmt.Println("All done")
+		log.Println("Done fetching data from Eloverblik")
 
 		// wait until the configured time has passed before updating the DB again
 		time.Sleep(time.Duration(settings.NorlysAPI.UpdatePricesInterval) * time.Second)
