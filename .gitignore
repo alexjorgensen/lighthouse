@@ -6,6 +6,7 @@
 *.dylib
 
 bin/lighthouse
+bin/.requestToken
 
 # Test binary, built with `go test -c`
 *.test

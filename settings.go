@@ -13,7 +13,8 @@ import (
 const filename = "lighthouse.toml"
 
 type Settings struct {
-	Database struct {
+	SaveRequestTokenToDisk bool `toml:"SaveRequestTokenToDisk"`
+	Database               struct {
 		Name     string `toml:"Name"`
 		HostName string `toml:"HostName"`
 		Username string `toml:"Username"`
