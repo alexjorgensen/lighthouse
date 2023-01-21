@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"log"
+	"net/http"
 	"os"
-	"time"
+	"strconv"
 )
 
 func main() {
@@ -30,7 +32,14 @@ func main() {
 	// Manage updating and saving of Eloverblik Data
 	go GetAndSaveEloverblikData(&settings, &db)
 
-	for {
-		time.Sleep(1 * time.Hour)
+	// init the echo library
+	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
+
+	e.GET("/usage", HandleGETUsage)
+	log.Println("Listening for HTTPS requests on port 4001")
+	if err := e.Start("::" + strconv.Itoa(settings.APIPort)); err != http.ErrServerClosed {
+		log.Fatal(err)
 	}
 }

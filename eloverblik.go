@@ -65,6 +65,42 @@ type EloverblikMeteringPoint struct {
 	ChildMeteringPoints     []interface{} `json:"childMeteringPoints"`
 }
 
+type EloverblikGetChargesResult struct {
+	Result []struct {
+		Result struct {
+			Fees            []interface{} `json:"fees"`
+			MeteringPointId string        `json:"meteringPointId"`
+			Subscriptions   []struct {
+				Price         float64     `json:"price"`
+				Quantity      int         `json:"quantity"`
+				Name          string      `json:"name"`
+				Description   string      `json:"description"`
+				Owner         string      `json:"owner"`
+				ValidFromDate time.Time   `json:"validFromDate"`
+				ValidToDate   interface{} `json:"validToDate"`
+				PeriodType    string      `json:"periodType"`
+			} `json:"subscriptions"`
+			Tariffs []struct {
+				Prices []struct {
+					Position string  `json:"position"`
+					Price    float64 `json:"price"`
+				} `json:"prices"`
+				Name          string      `json:"name"`
+				Description   string      `json:"description"`
+				Owner         string      `json:"owner"`
+				ValidFromDate time.Time   `json:"validFromDate"`
+				ValidToDate   interface{} `json:"validToDate"`
+				PeriodType    string      `json:"periodType"`
+			} `json:"tariffs"`
+		} `json:"result"`
+		Success    bool        `json:"success"`
+		ErrorCode  int         `json:"errorCode"`
+		ErrorText  string      `json:"errorText"`
+		Id         string      `json:"id"`
+		StackTrace interface{} `json:"stackTrace"`
+	} `json:"result"`
+}
+
 type EloverblikMeteringTimeSeriesResult struct {
 	Result []struct {
 		MyEnergyDataMarketDocument struct {
@@ -221,10 +257,7 @@ func (eo *ElOverblik) GetRequestToken(forceGetToken bool, saveToken bool) error 
 	claims, _ := sjwt.Parse(tokenRes.Result)
 
 	// Get claims
-	exp, err := claims.GetStr("exp") // John Doe
-	if err != nil {
-		return err
-	}
+	exp, err := claims.GetStr("exp")
 
 	// convert the exp string to int64
 	expire, err := strconv.ParseInt(exp, 10, 64)

@@ -12,10 +12,12 @@ import (
 // settingsFile contains the configuration filename
 const filename = "lighthouse.toml"
 
+// Settings contains the entire configuration for the program
 type Settings struct {
 	SaveRequestTokenToDisk      bool `toml:"SaveRequestTokenToDisk"`
 	NumberOfDaysForPrices       int  `toml:"NumberOfDaysForPrices"`
 	NumberOfDaysForMeteringData int  `toml:"NumberOfDaysForMeteringData"`
+	APIPort                     int  `toml:"APIPort"`
 	Database                    struct {
 		Name     string `toml:"Name"`
 		HostName string `toml:"HostName"`
