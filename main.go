@@ -39,7 +39,7 @@ func main() {
 
 	e.GET("/usage", HandleGETUsage)
 	log.Println("Listening for HTTPS requests on port 4001")
-	if err := e.Start("::" + strconv.Itoa(settings.APIPort)); err != http.ErrServerClosed {
+	if err := e.Start(":" + strconv.Itoa(settings.APIPort)); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }
