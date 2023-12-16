@@ -23,7 +23,7 @@ func main() {
 	err = db.ConnectToDatabase(&settings)
 	if err != nil {
 		log.Println("error connecting to db:", err.Error())
-		os.Exit(1)
+		os.Exit()
 	}
 
 	// Manage updating and saving of Norlys prices
